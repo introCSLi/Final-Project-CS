@@ -1,4 +1,0 @@
-
-def setup():
-    
-def draw():
