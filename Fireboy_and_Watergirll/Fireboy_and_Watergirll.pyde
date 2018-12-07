@@ -7,14 +7,11 @@ class Creature:
         self.y = y
         self.r = r
         self.g = g
-        self.img = loadImage(path + "images/" + img)
-        # self.w=w
-        # self.h=h
-        # self.f=0
-        # self.F=F
+        self.img = loadImage(path + "images/" + img + ".png")
         self.vx = 0
         self.vy = 0
-        # self.dir = 1
+        self.direction1 = 0
+        self.direction2 = 0
        
         
     def gravity(self):
@@ -33,25 +30,45 @@ class Creature:
         
     def display(self):
         self.update()
-        self.img.resize(50,50)
-        image(self.img, self.x, self.y)
-        
+    
+        if self.direction1 == 1:
+            self.boyRight.resize(50,50)
+            image(self.boyRight, self.x, self.y)
+        elif self.direction1 == -1:
+            self.boyLeft.resize(50,50)
+            image(self.boyLeft, self.x, self.y)
+
+        if self.direction2 == 1:
+            self.girlRight.resize(50,50)
+            image(self.girlRight, self.x, self.y)
+        elif self.direction2 == -1:
+            self.girlLeft.resize(50,50)
+            image(self.girlLeft, self.x, self.y)
+        if self.vx == 0:
+            self.direction1 = 0
+            self.direction2 = 0
+            self.img.resize(50,50)
+            image(self.img, self.x, self.y)
+                
         stroke(255,0,0)
         
 class Fireboy(Creature):
     def __init__(self,x,y,r,g,img):
         Creature.__init__(self, x, y, r, g, img)
         self.keyHandler = {LEFT:False, RIGHT:False, UP:False}
+        self.boyLeft = loadImage(path + "images/" + img + "_left"+ ".png")
+        self.boyRight = loadImage(path + "images/" + img + "_right" + ".png")
+                                 
     
     def update(self):
         self.gravity() 
         
         if self.keyHandler[LEFT]:
             self.vx = -5
-            # self.direction = -1
+            self.direction1 = -1
         elif self.keyHandler[RIGHT]:
             self.vx = 5
-            # self.direction = 1
+            self.direction1 = 1
         else:
             self.vx = 0
             
@@ -64,7 +81,8 @@ class Fireboy(Creature):
         self.x += self.vx
         self.y += self.vy
         
-    
+
+        
     
     
     
@@ -72,16 +90,18 @@ class Watergirl(Creature):
     def __init__(self,x,y,r,g,img):
         Creature.__init__(self, x, y, r, g, img)
         self.keyHandler = {LEFT:False, RIGHT:False, UP:False}
+        self.girlLeft = loadImage(path + "images/" + img + "_left"+ ".png")
+        self.girlRight = loadImage(path + "images/" + img + "_right" + ".png")
         
     def update(self):
         self.gravity() 
         
         if self.keyHandler[LEFT]:
             self.vx = -5
-            # self.direction = -1
+            self.direction2 = -1
         elif self.keyHandler[RIGHT]:
             self.vx = 5
-            # self.direction = 1
+            self.direction2 = 1
         else:
             self.vx = 0
             
@@ -102,26 +122,26 @@ class Game:
         self.w=w
         self.h=h
         self.g=g
-        self.fireboy = Fireboy(0, 50, 50, self.g, "boy.png")
-        self.watergirl=Watergirl(0, 50, 50, self.g, "girl.png")
+        self.fireboy = Fireboy(0, 50, 50, self.g, "boy")
+        #self.fireboy2 = Fireboy(0, 50, 50, self.g, "boy")
+        self.watergirl=Watergirl(0, 50, 50, self.g, "girl")
+        # self.bgImage = loadImage(path + "images/" + "background.png")
         
     def display(self):
-
+        # image(self.bgImage, 0, 0)
         self.fireboy.display()
         self.watergirl.display()
-    
-        # image(img,0,0,self.w-x%self.w,self.h,x%self.w,0,self.w,self.h)
-        # image(img,self.w-x%self.w,0,x%self.w,self.h,0,0,x%self.w,self.h)
+        
 
-
-g = Game(400, 400, 390)
+g = Game(1000, 750, 740)
 
 def setup():
     size(g.w, g.h)
-    background(255)
+
+bg = loadImage(path+"images/background.png")
 
 def draw():
-    background(255)
+    background(bg)
     g.display()
 
 
