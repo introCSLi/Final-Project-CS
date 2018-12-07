@@ -32,22 +32,22 @@ class Creature:
         self.update()
     
         if self.direction1 == 1:
-            self.boyRight.resize(50,50)
+            self.boyRight.resize(60,60)
             image(self.boyRight, self.x, self.y)
         elif self.direction1 == -1:
-            self.boyLeft.resize(50,50)
+            self.boyLeft.resize(60,60)
             image(self.boyLeft, self.x, self.y)
 
         if self.direction2 == 1:
-            self.girlRight.resize(50,50)
+            self.girlRight.resize(60,60)
             image(self.girlRight, self.x, self.y)
         elif self.direction2 == -1:
-            self.girlLeft.resize(50,50)
+            self.girlLeft.resize(60,60)
             image(self.girlLeft, self.x, self.y)
         if self.vx == 0:
             self.direction1 = 0
             self.direction2 = 0
-            self.img.resize(50,50)
+            self.img.resize(60,60)
             image(self.img, self.x, self.y)
                 
         stroke(255,0,0)
@@ -58,6 +58,7 @@ class Fireboy(Creature):
         self.keyHandler = {LEFT:False, RIGHT:False, UP:False}
         self.boyLeft = loadImage(path + "images/" + img + "_left"+ ".png")
         self.boyRight = loadImage(path + "images/" + img + "_right" + ".png")
+        self.dmndCnt1 = 0
                                  
     
     def update(self):
@@ -81,9 +82,13 @@ class Fireboy(Creature):
         self.x += self.vx
         self.y += self.vy
         
-
+        for d in g.diamonds:
+            if self.distance(d) <= self.r + d.r and d.v == "f":
+                g.diamonds.remove(d)
+                self.dmndCnt1 += 1
         
-    
+    def distance(self, target):
+        return ((self.x - target.x)**2 + (self.y - target.y)**2)**0.5
     
     
 class Watergirl(Creature):
@@ -92,6 +97,7 @@ class Watergirl(Creature):
         self.keyHandler = {LEFT:False, RIGHT:False, UP:False}
         self.girlLeft = loadImage(path + "images/" + img + "_left"+ ".png")
         self.girlRight = loadImage(path + "images/" + img + "_right" + ".png")
+        self.dmndCnt2 = 0
         
     def update(self):
         self.gravity() 
@@ -113,8 +119,39 @@ class Watergirl(Creature):
         
         self.x += self.vx
         self.y += self.vy
-
-
+        
+        for d in g.diamonds:
+            if self.distance(d) <= self.r + d.r and d.v == "w":
+                g.diamonds.remove(d)  
+        
+    def distance(self, target):
+        return ((self.x - target.x)**2 + (self.y - target.y)**2)**0.5
+    
+class Platform:
+    def __init__(self, x, y, w, h, img):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.img = loadImage(path+"images/"+img)
+        
+    def display(self):
+        self.img.resize(250,30)
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+        
+class Diamond:
+    def __init__(self, x, y, w, h, img, r, v):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.img = loadImage(path+"images/"+img)
+        self.r = r
+        self.v = v
+        
+    def display(self):
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+        
 
 class Game:
     def __init__ (self,w,h,g):
@@ -123,14 +160,28 @@ class Game:
         self.h=h
         self.g=g
         self.fireboy = Fireboy(0, 50, 50, self.g, "boy")
-        #self.fireboy2 = Fireboy(0, 50, 50, self.g, "boy")
         self.watergirl=Watergirl(0, 50, 50, self.g, "girl")
-        # self.bgImage = loadImage(path + "images/" + "background.png")
+        
+        self.platforms = []
+        for i in range(3):
+            self.platforms.append(Platform(0,300+i*150,350,25,"platform.png"))
+            
+        self.diamonds = []
+        for i in range(3):
+            self.diamonds.append(Diamond(20 + 70*i, 260+i*150, 35, 35, "diamond_fire.png",15,"f"))
+            self.diamonds.append(Diamond(80 + 70*i, 260+i*150, 35, 35, "diamond_water.png",15,"w"))
+        
         
     def display(self):
-        # image(self.bgImage, 0, 0)
+        for p in self.platforms:
+            p.display()
+            
+        for d in self.diamonds:
+            d.display()
+            
         self.fireboy.display()
         self.watergirl.display()
+        
         
 
 g = Game(1000, 750, 740)
