@@ -22,6 +22,11 @@ class Creature:
         else:
             self.vy = 0
             
+        for p in g.platforms:
+            if self.y+self.r <= p.y and self.x+self.r >= p.x and self.x-self.r <= p.x+p.w/1.35:
+                self.g = p.y
+                break
+            self.g = g.g
             
     def update(self):
         self.gravity()
@@ -50,7 +55,7 @@ class Creature:
             self.img.resize(60,60)
             image(self.img, self.x, self.y)
                 
-        stroke(255,0,0)
+        #stroke(255,0,0)
         
 class Fireboy(Creature):
     def __init__(self,x,y,r,g,img):
@@ -114,8 +119,8 @@ class Watergirl(Creature):
         if self.keyHandler[UP] and self.y + self.r == self.g:
             self.vy = -12
             
-        # if self.x - self.r < 0:
-        #     self.x = self.r 
+        #if self.x - self.r < 0:
+         #    self.x = self.r 
         
         self.x += self.vx
         self.y += self.vy
@@ -136,7 +141,6 @@ class Platform:
         self.img = loadImage(path+"images/"+img)
         
     def display(self):
-        self.img.resize(250,30)
         image(self.img, self.x - g.x, self.y, self.w, self.h)
         
 class Diamond:
@@ -163,13 +167,24 @@ class Game:
         self.watergirl=Watergirl(0, 50, 50, self.g, "girl")
         
         self.platforms = []
-        for i in range(3):
-            self.platforms.append(Platform(0,300+i*150,350,25,"platform.png"))
-            
         self.diamonds = []
-        for i in range(3):
-            self.diamonds.append(Diamond(20 + 70*i, 260+i*150, 35, 35, "diamond_fire.png",15,"f"))
-            self.diamonds.append(Diamond(80 + 70*i, 260+i*150, 35, 35, "diamond_water.png",15,"w"))
+        f = open(path+"/platforms.csv","r")
+        for l in f:
+            l = l.strip().split(",")
+            if l[0] == "platform long":
+                self.platforms.append(Platform(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"platform.png"))
+            elif l[0]=="platform short":
+                self.platforms.append(Platform(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"platform.png"))
+            elif l[0]=="red":
+                self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_fire.png",15,"f"))
+            elif l[0]=="blue":
+                self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_water.png",15,"w"))
+                
+
+        
+      #  for i in range(3):
+       #     self.diamonds.append(Diamond(20 + 70*i, 260+i*150, 35, 35, "diamond_fire.png",15,"f"))
+        #    self.diamonds.append(Diamond(80 + 70*i, 260+i*150, 35, 35, "diamond_water.png",15,"w"))
         
         
     def display(self):
