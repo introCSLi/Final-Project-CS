@@ -26,6 +26,10 @@ class Creature:
             if self.y+self.r <= p.y and self.x+self.r >= p.x and self.x-self.r <= p.x+p.w/1.35:
                 self.g = p.y
                 break
+            elif self.y+self.r>=p.y+p.h and self.y<=p.y and self.x+self.r >= p.x and self.x-self.r <= p.x+p.w/1.35:
+                self.y+=1
+                print("hi")
+                self.vy=0
             self.g = g.g
             
     def update(self):
@@ -80,9 +84,6 @@ class Fireboy(Creature):
             
         if self.keyHandler[UP] and self.y + self.r == self.g:
             self.vy = -12
-            
-        # if self.x - self.r < 0:
-        #     self.x = self.r 
         
         self.x += self.vx
         self.y += self.vy
@@ -179,12 +180,6 @@ class Game:
                 self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_fire.png",15,"f"))
             elif l[0]=="blue":
                 self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_water.png",15,"w"))
-                
-
-        
-      #  for i in range(3):
-       #     self.diamonds.append(Diamond(20 + 70*i, 260+i*150, 35, 35, "diamond_fire.png",15,"f"))
-        #    self.diamonds.append(Diamond(80 + 70*i, 260+i*150, 35, 35, "diamond_water.png",15,"w"))
         
         
     def display(self):
