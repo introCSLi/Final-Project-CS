@@ -24,12 +24,11 @@ class Creature:
             
         for p in g.platforms:
             if self.y+self.r <= p.y and self.x+self.r >= p.x and self.x <= p.x+p.w:
-                print(self.x)
                 self.g = p.y
                 break
             elif self.y+self.r>=p.y+p.h and self.y<=p.y and self.x+self.r >= p.x and self.x <= p.x+p.w:
                 self.y+=1
-                self.vy=5
+                self.vy=3
             self.g = g.g
             
     def update(self):
@@ -82,7 +81,7 @@ class Fireboy(Creature):
             self.vx = 0
             
         if self.keyHandler[UP] and self.y + self.r == self.g:
-            self.vy = -12
+            self.vy = -11
         
         self.x += self.vx
         self.y += self.vy
@@ -92,7 +91,9 @@ class Fireboy(Creature):
                 g.diamonds.remove(d)
                 self.dmndCnt1 += 1
                 
-        
+        for l in g.lava:
+            if self.distance(d)<=self.r + d.r and d.v == "w":
+                print("Game over boy")
         
     def distance(self, target):
         return ((self.x - target.x)**2 + (self.y - target.y)**2)**0.5
@@ -119,18 +120,16 @@ class Watergirl(Creature):
             self.vx = 0
             
         if self.keyHandler[UP] and self.y + self.r == self.g:
-            self.vy = -12
-            
-        #if self.x - self.r < 0:
-         #    self.x = self.r 
-        
+            self.vy = -11
+    
         self.x += self.vx
         self.y += self.vy
         
         for d in g.diamonds:
             if self.distance(d) <= self.r + d.r and d.v == "w":
                 g.diamonds.remove(d)  
-        
+                
+                    
     def distance(self, target):
         return ((self.x - target.x)**2 + (self.y - target.y)**2)**0.5
     
@@ -159,14 +158,13 @@ class Diamond:
         image(self.img, self.x - g.x, self.y, self.w, self.h)
         
 class Lava:
-    def __init__(self, x, y, w, h, img, r, v):
+    def __init__(self, x, y, w, h, img, v):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
         self.img = loadImage(path+"images/"+img)
-        self.r = r
-        self.v = v
+        self.v=v
     def display(self):
         image(self.img, self.x - g.x, self.y, self.w, self.h)
     
@@ -178,11 +176,11 @@ class Game:
         self.w=w
         self.h=h
         self.g=g
-        self.fireboy = Fireboy(0, 50, 50, self.g, "boy")
-        self.watergirl=Watergirl(0, 50, 50, self.g, "girl")
-        
+        self.fireboy = Fireboy(0, 650, 50, self.g, "boy")
+        self.watergirl=Watergirl(0, 560, 50, self.g, "girl")
         self.platforms = []
         self.diamonds = []
+        self.lava=[]
         f = open(path+"/platforms.csv","r")
         for l in f:
             l = l.strip().split(",")
@@ -194,7 +192,10 @@ class Game:
                 self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_fire.png",15,"f"))
             elif l[0]=="blue":
                 self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_water.png",15,"w"))
-        
+            elif l[0]=="lava":
+                self.lava.append(Lava(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "lava.PNG", "f"))
+            elif l[0]=="water":
+                self.lava.append(Lava(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "water.png", "w"))
         
     def display(self):
         for p in self.platforms:
@@ -202,6 +203,9 @@ class Game:
             
         for d in self.diamonds:
             d.display()
+            
+        for l in self.lava:
+            l.display()
             
         self.fireboy.display()
         self.watergirl.display()
