@@ -23,13 +23,13 @@ class Creature:
             self.vy = 0
             
         for p in g.platforms:
-            if self.y+self.r <= p.y and self.x+self.r >= p.x and self.x-self.r <= p.x+p.w/1.35:
+            if self.y+self.r <= p.y and self.x+self.r >= p.x and self.x <= p.x+p.w:
+                print(self.x)
                 self.g = p.y
                 break
-            elif self.y+self.r>=p.y+p.h and self.y<=p.y and self.x+self.r >= p.x and self.x-self.r <= p.x+p.w/1.35:
+            elif self.y+self.r>=p.y+p.h and self.y<=p.y and self.x+self.r >= p.x and self.x <= p.x+p.w:
                 self.y+=1
-                print("hi")
-                self.vy=0
+                self.vy=5
             self.g = g.g
             
     def update(self):
@@ -59,8 +59,7 @@ class Creature:
             self.img.resize(60,60)
             image(self.img, self.x, self.y)
                 
-        #stroke(255,0,0)
-        
+
 class Fireboy(Creature):
     def __init__(self,x,y,r,g,img):
         Creature.__init__(self, x, y, r, g, img)
@@ -92,6 +91,8 @@ class Fireboy(Creature):
             if self.distance(d) <= self.r + d.r and d.v == "f":
                 g.diamonds.remove(d)
                 self.dmndCnt1 += 1
+                
+        
         
     def distance(self, target):
         return ((self.x - target.x)**2 + (self.y - target.y)**2)**0.5
@@ -157,6 +158,19 @@ class Diamond:
     def display(self):
         image(self.img, self.x - g.x, self.y, self.w, self.h)
         
+class Lava:
+    def __init__(self, x, y, w, h, img, r, v):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.img = loadImage(path+"images/"+img)
+        self.r = r
+        self.v = v
+    def display(self):
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+    
+        
 
 class Game:
     def __init__ (self,w,h,g):
@@ -191,7 +205,6 @@ class Game:
             
         self.fireboy.display()
         self.watergirl.display()
-        
         
 
 g = Game(1000, 750, 740)
