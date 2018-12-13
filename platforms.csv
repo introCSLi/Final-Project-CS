@@ -1,0 +1,23 @@
+red, 330,50, 35, 35
+red, 540,60, 35, 35
+blue, 670,60, 35, 35
+platform long,300,90,350,30
+platform long,650,90,350,30
+blue, 50,130, 35, 35
+platform short,0,170,170,30
+platform long,0,310,350,30
+platform long,350,310,350,30
+platform short,700,310,170,30
+red, 250,400, 35, 35
+blue, 650,410, 35, 35
+platform short,130,450,170,30
+platform long,300,450,350,30
+platform long,650,450,350,30
+platform long,0,570,350,30
+platform long,350,570,350,30
+platform long,0,660,350,30
+platform short,830,660,170,30
+red, 500,700, 35, 35
+blue, 720,700, 35, 35
+lava,  430,730, 125, 20
+water,  650,730, 125, 20
