@@ -25,6 +25,8 @@ class Creature:
 
         self.g = g.g
         
+        #checking for collision with the platforms: if the character jumps and there's a platform above, 
+        #he won't jump over it; if there's a platform below him, he'll stand on it
         for p in g.platforms:            
             if self.x + self.r >= p.x and self.x <= p.x + p.w - self.r:
                 if self.y + 2 * self.r <= p.y:
@@ -40,12 +42,12 @@ class Creature:
 
     def display(self):
         self.update()
-
+        
+        #changing the direction for displaying pictures of the characters
         if self.direction1 == 1:
             image(self.boyRight, self.x, self.y)
         elif self.direction1 == -1:
             image(self.boyLeft, self.x, self.y)
-
         if self.direction2 == 1:
             image(self.girlRight, self.x, self.y)
         elif self.direction2 == -1:
@@ -64,16 +66,20 @@ class Fireboy(Creature):
         self.boyLeft = loadImage(path + "images/" + img + "_left" + ".png")
         self.boyRight = loadImage(path + "images/" + img + "_right" + ".png")
         self.dmndCnt1 = 0
-
+        self.stop_x1 = False
+    
     def update(self):
         self.gravity()
-
+        
+        #prevents fireboy from leaving the premises of the screen
         if self.x-self.r/2>=0 and self.x<=1000 and self.keyHandler[LEFT]:
-            self.vx = -8
-            self.direction1 = -1
+            if self.stop_x1 == False:
+                self.vx = -8
+                self.direction1 = -1
         elif self.x>=0 and self.x+2*self.r<=1000 and self.keyHandler[RIGHT]:
-            self.vx = 8
-            self.direction1 = 1
+            if self.stop_x1 == False:
+                self.vx = 8
+                self.direction1 = 1
         else:
             self.vx = 0
 
@@ -82,27 +88,35 @@ class Fireboy(Creature):
 
         self.x += self.vx
         self.y += self.vy
-
+        
+        for p in g.platforms: 
+            if self.y + self.r >= p.y and self.y + self.r <= p.y + p.h and ( abs(self.x + self.r - (p.x + p.w))< 10 or abs(self.x + self.r - p.x)< 10):
+                self.stop_x1 = True
+            else:
+                self.stop_x1 = False
+        
+        #collecing the diamonds
         for d in g.diamonds:
             if self.distance(d) <= 2 * self.r + d.r and d.v == "f":
                 g.diamonds.remove(d)
                 self.dmndCnt1 += 1
-
+        
+        #if the character steps on lava, the game restarts
         for l in g.lava:
             if self.x + self.r >= l.x and self.x + self.r <= l.x + l.w and self.y + 2*self.r >= l.y and self.y + 2*self.r <= l.y + l.h and l.v == 'w':
                 image(g.gameOver, g.w/2 - 250, g.h/2 - 90)
                 textSize(30)
                 text("press space to restart", g.w/2 - 160, g.h/2 + 140)
                 g.endOfGame = True
-    
+        
+        #changing the conditions to open the doors
         for d in g.doors:
             if self.distance(d) <= self.r and d.v == 'b':
                 d.boy_door_open = True 
             else:
                 d.boy_door_open = False    
-        
-            
-
+                
+    #measuring the distance between the character and an object    
     def distance(self, target):
         return ((self.x - target.x) ** 2 + (self.y - target.y) ** 2) ** 0.5
 
@@ -115,14 +129,22 @@ class Watergirl(Creature):
         self.girlLeft = loadImage(path + "images/" + img + "_left" + ".png")
         self.girlRight = loadImage(path + "images/" + img + "_right" + ".png")
         self.dmndCnt2 = 0
+        self.stop_x2 = False
 
     def update(self):
         self.gravity()
-
+        
+        #prevents fireboy from leaving the premises of the screen
         if self.x-self.r/2>=0 and self.x<=1000 and self.keyHandler[LEFT]:
+            if self.stop_x2 == True:
+                self.vx *= -1
+                return
             self.vx = -8
             self.direction2 = -1
         elif self.x>=0 and self.x+2*self.r<=1000 and self.keyHandler[RIGHT]:
+            if self.stop_x2 == True:
+                self.vx *= -1
+                return
             self.vx = 8
             self.direction2 = 1
         else:
@@ -133,11 +155,13 @@ class Watergirl(Creature):
 
         self.x += self.vx
         self.y += self.vy
-
+        
+        #collecing the diamonds
         for d in g.diamonds:
             if self.distance(d) <= 2 * self.r + d.r and d.v == "w":
                 g.diamonds.remove(d)
                 
+        #if the character steps on water, the game restarts
         for l in g.lava:
             if self.x + self.r >= l.x and self.x + self.r <= l.x + l.w and self.y + 2*self.r >= l.y and self.y + 2*self.r <= l.y + l.h and l.v == 'f':
                 image(g.gameOver, g.w/2 - 250, g.h/2 - 90)
@@ -145,12 +169,14 @@ class Watergirl(Creature):
                 text("press space to restart", g.w/2 - 160, g.h/2 + 140)
                 g.endOfGame = True
     
+        #changing the conditions to open the doors
         for d in g.doors:
             if self.distance(d) <= d.w/2 and d.v == 'g':
                 d.girl_door_open = True 
             else:
                 d.girl_door_open = False
-
+                
+    #measuring the distance between the character and an object    
     def distance(self, target):
         return ((self.x - target.x) ** 2 + (self.y - target.y) ** 2) ** 0.5
     
@@ -167,6 +193,7 @@ class Doors:
         self.boy_open = loadImage(path + "images/boy_door_open.png")
         self.girl_open = loadImage(path + "images/girl_door_open.png")
  
+    #displaying the closed/opened doors depending on whether the characters stand in front of them
     def display(self):
         if self.boy_door_open == False and self.v == 'b':
             image(self.img, self.x - g.x, self.y, self.w, self.h)
@@ -253,7 +280,9 @@ class Game:
         self.fireboy = Fireboy(0, 650, 30, self.g, "boy")
         self.watergirl = Watergirl(0, 560, 30, self.g, "girl")
         self.gameOver = loadImage(path + "images/game_over.png")
+        #levelTwo is responsible for switching to the second level of the game
         self.levelTwo = levelTwo
+        #if we're on level 2, two images that will be used at the end of the game are loaded
         if self.levelTwo == True:
             self.endPic = loadImage(path + "images/end.png")
             self.gameWin = loadImage(path + "images/win.png")
@@ -266,7 +295,7 @@ class Game:
         self.bars=[]
         self.flag = 0
         
-        
+        #depending on the level, we iterate through different .csv files to set up the levels
         if self.levelTwo == False:
             f = open(path+"/setUpGame_1.csv","r")
             for l in f:
@@ -355,6 +384,9 @@ class Game:
                 cnt += 1
             if d.girl_door_open == True:
                 cnt += 1
+                
+        #if both doors are open on level one, we move to the level two
+        #if both doors are open on level two, the game is won
         if cnt == 2:
             if self.levelTwo == True:
                 self.flag = 1
@@ -365,10 +397,8 @@ class Game:
                 g.endOfGame = True
                 return 
             g.__init__(1000, 750, 750, True)
-        
     
-
-
+#initializing the game, starting with level one
 g = Game(1000, 750, 750, False)
 
 def setup():
@@ -380,33 +410,26 @@ def draw():
     if not g.endOfGame:
         background(bg)
         g.display()
-        # elif g.flag == 1:
-        #     background(255)
-        #     g.display()
+
    
-        
-
-
-
 def keyPressed():
-    print(keyCode)
-    # code for space is 32
+    #moving the characters
     if keyCode == LEFT:
         g.fireboy.keyHandler[LEFT] = True
     elif keyCode == RIGHT:
         g.fireboy.keyHandler[RIGHT] = True
     elif keyCode == UP:
         g.fireboy.keyHandler[UP] = True
-
     elif key == "a":
         g.watergirl.keyHandler[LEFT] = True
     elif key == "d":
         g.watergirl.keyHandler[RIGHT] = True
     elif key == "w":
         g.watergirl.keyHandler[UP] = True
-        
+    #used to restart the level after the user stepped in lava
     if g.endOfGame == True and keyCode == 32:
         g.__init__(1000, 750, 750, g.levelTwo) 
+    #used to restart the game when the user finished both levels
     if g.endOfGame == True and g.levelTwo == True and g.flag == 1 and keyCode == 10:
         g.__init__(1000, 750, 750, False)
 
@@ -417,7 +440,6 @@ def keyReleased():
         g.fireboy.keyHandler[RIGHT] = False
     elif keyCode == UP:
         g.fireboy.keyHandler[UP] = False
-
     elif key == "a":
         g.watergirl.keyHandler[LEFT] = False
     elif key == "d":
