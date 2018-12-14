@@ -1,6 +1,4 @@
-import os
-import random
-import time
+import os, random, time
 path = os.getcwd() + "/"
 
 class Creature:
@@ -256,6 +254,9 @@ class Game:
         self.watergirl = Watergirl(0, 560, 30, self.g, "girl")
         self.gameOver = loadImage(path + "images/game_over.png")
         self.levelTwo = levelTwo
+        if self.levelTwo == True:
+            self.endPic = loadImage(path + "images/end.png")
+            self.gameWin = loadImage(path + "images/win.png")
         self.endOfGame = False
         self.platforms = []
         self.diamonds = []
@@ -263,6 +264,7 @@ class Game:
         self.buttons=[]
         self.doors=[]
         self.bars=[]
+        self.flag = 0
         
         
         if self.levelTwo == False:
@@ -335,15 +337,16 @@ class Game:
         
         for d in self.doors:
              d.display()
-             
-        for b in self.bars:
-             b.display()
-             
-        for button in self.buttons:
-             button.display()
-             
-        self.fireboy.display()
-        self.watergirl.display()
+        if self.endOfGame == False:
+                
+            for b in self.bars:
+                b.display()
+                
+            for button in self.buttons:
+                button.display()
+                
+            self.fireboy.display()
+            self.watergirl.display()
         
     def checkWin(self):
         cnt = 0
@@ -353,6 +356,14 @@ class Game:
             if d.girl_door_open == True:
                 cnt += 1
         if cnt == 2:
+            if self.levelTwo == True:
+                self.flag = 1
+                image(self.endPic, 0, 0)
+                image(self.gameWin, self.w/2 - 250, self.h/2 - 250)
+                textSize(30)
+                text("to play again, press enter", g.w/2 - 180, g.h/2 + 280)
+                g.endOfGame = True
+                return 
             g.__init__(1000, 750, 750, True)
         
     
@@ -369,9 +380,16 @@ def draw():
     if not g.endOfGame:
         background(bg)
         g.display()
+        # elif g.flag == 1:
+        #     background(255)
+        #     g.display()
+   
+        
+
 
 
 def keyPressed():
+    print(keyCode)
     # code for space is 32
     if keyCode == LEFT:
         g.fireboy.keyHandler[LEFT] = True
@@ -389,6 +407,8 @@ def keyPressed():
         
     if g.endOfGame == True and keyCode == 32:
         g.__init__(1000, 750, 750, g.levelTwo) 
+    if g.endOfGame == True and g.levelTwo == True and g.flag == 1 and keyCode == 10:
+        g.__init__(1000, 750, 750, False)
 
 def keyReleased():
     if keyCode == LEFT:

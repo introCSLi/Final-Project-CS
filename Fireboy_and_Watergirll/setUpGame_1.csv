@@ -2,18 +2,18 @@ lava,430,730,125,20
 water,650,730,125,20
 red,475,700,35,35
 blue,695,700,35,35
-platform long,0,660,350,30
-platform short,830,660,170,30
-platform long,0,570,350,30
-platform long,350,570,350,30
-yellow_button,200,550,40,20
-yellow_bar,10,450,95,20
-platform short,130,450,170,30
-platform long,300,450,350,30
-platform long,650,450,350,30
-purple_button,290,430,40,20
-red,200,410,35,35
-blue,650,410,35,35
+platform long,0,650,350,30
+platform short,830,650,170,30
+platform long,0,540,350,30
+platform long,350,540,350,30
+yellow_button,200,520,40,20
+yellow_bar,10,415,95,20
+platform short,130,415,170,30
+platform long,300,415,350,30
+platform long,650,415,350,30
+purple_button,290,395,40,20
+red,200,375,35,35
+blue,650,375,35,35
 purple_bar,890,310,95,20
 platform long,0,310,350,30
 platform long,350,310,350,30
