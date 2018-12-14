@@ -73,13 +73,13 @@ class Fireboy(Creature):
     def update(self):
         self.gravity()
 
-        if self.keyHandler[LEFT]:
+        if self.x-self.r/2>=0 and self.x<=1000 and self.keyHandler[LEFT]:
             if self.stop_x == False:
                 self.vx = -8
                 self.direction1 = -1
             else:
                 self.vx = 0
-        elif self.keyHandler[RIGHT]:
+        elif self.x>=0 and self.x+2*self.r<=1000 and self.keyHandler[RIGHT]:
             if self.stop_x == False:
                 self.vx = 8
                 self.direction1 = 1
@@ -102,7 +102,12 @@ class Fireboy(Creature):
         for l in g.lava:
             if self.distance(l) <= 2 * self.r + l.r and l.v == "w":
                 print("Game over boy")
-
+       # for button in g.buttons: 
+        #    if self.distance(button) <= self.r + d.r and d.v == "p":
+                #move purple bar down while standing
+          #  elif self.distance(button) <= self.r + d.r and d.v == "y":
+                #move the yellow bar
+                
     def distance(self, target):
         return ((self.x - target.x) ** 2 + (self.y - target.y) ** 2) ** 0.5
 
@@ -118,14 +123,13 @@ class Watergirl(Creature):
 
     def update(self):
         self.gravity()
-
-        if self.keyHandler[LEFT]:
+        if self.x-self.r/2>=0 and self.x<=1000 and self.keyHandler[LEFT]:
             if self.stop_x == False:
                 self.vx = -8
                 self.direction2 = -1
             else:
                 self.vx = 0
-        elif self.keyHandler[RIGHT]:
+        elif self.x>=0 and self.x+2*self.r<=1000 and self.keyHandler[RIGHT]:
             if self.stop_x == False:
                 self.vx = 8
                 self.direction2 = 1
@@ -148,6 +152,11 @@ class Watergirl(Creature):
             if self.distance(l) <= 2 * self.r + l.r and l.v == "f":
                 print("game over, girl")
                 
+        # for button in g.buttons: 
+        #     if self.distance(button) <= self.r + d.r and d.v == "p":
+        #         #move purple bar down while standing on it, move back up otherwise 
+        #     elif self.distance(button) <= self.r + d.r and d.v == "y":
+        #         #move the yellow bar
     def distance(self, target):
         return ((self.x - target.x-target.w/2) ** 2 + (self.y - target.y) ** 2) ** 0.5
 
@@ -213,8 +222,20 @@ class Lava:
 
     def display(self):
         image(self.img, self.x - g.x, self.y, self.w, self.h)
+        
+class Buttons:
+    def __init__(self, x, y, r, w, h, img, v):
+        self.x = x
+        self.y = y
+        self.r = r
+        self.w = w
+        self.h = h
+        self.img = loadImage(path + "images/" + img)
+        self.v = v
 
-
+    def display(self):
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+        
 class Game:
 
     def __init__(self, w, h, g):
@@ -229,6 +250,7 @@ class Game:
         self.lava = []
         self.doors=[]
         self.bars=[]
+        self.buttons=[]
         f = open(path+"/platforms.csv","r")
         for l in f:
             l = l.strip().split(",")
@@ -250,12 +272,13 @@ class Game:
                 self.doors.append(Doors(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "girl door closed.PNG"))
             elif l[0]=="purple_bar":
                 self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple bar.PNG"))
-            elif l[0]=="yello_bar":
+            elif l[0]=="yellow_bar":
                 self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow bar.PNG"))
+            elif l[0]=="yellow button":
+                self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow button.png"))
+            elif l[0]=="purple button":
+                self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple button.PNG"))
     
-    
-                
-
     def display(self):
         for p in self.platforms:
             p.display()
@@ -270,7 +293,10 @@ class Game:
             d.display()
             
         for b in self.bars:
-            p.display()
+            b.display()
+            
+        for button in self.buttons:
+            button.display()
             
         self.fireboy.display()
         self.watergirl.display()
