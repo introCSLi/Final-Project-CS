@@ -1,5 +1,7 @@
 import os, random, time
 path = os.getcwd() + "/"
+add_library('minim')
+player = Minim(this)
 
 class Creature:
 
@@ -27,12 +29,27 @@ class Creature:
         
         #checking for collision with the platforms: if the character jumps and there's a platform above, 
         #he won't jump over it; if there's a platform below him, he'll stand on it
-        for p in g.platforms:            
+        for p in g.platforms:
             if self.x + self.r >= p.x and self.x <= p.x + p.w - self.r:
-                if self.y + 2 * self.r <= p.y:
+                if self.y + 2 * self.r <= p.y and self.g > p.y:
                     self.g = p.y
                 elif self.y + self.vy <= p.y + p.h -10 and self.y >= p.y + p.h - 10:
                     self.vy = self.y - p.y - p.h + 10
+                    
+        #checking for collision with the bars, making sure the characters follow them on screen
+        for bar in g.bars:
+            if self.x + self.r >= bar.x and self.x <= bar.x + bar.w - self.r:
+                if self.y + 2 * self.r <= bar.y and self.g > bar.y:
+                    if bar.state == 0:
+                        self.g = bar.y
+                    elif bar.state == 2:
+                        self.y -= 1
+                        self.g = bar.y - 1
+                    elif bar.state == 1:
+                        self.y += 0
+                        self.g = bar.y + 1
+                elif self.y + self.vy <= bar.y + bar.h -10 and self.y >= bar.y + bar.h - 10:
+                    self.vy = self.y - bar.y - bar.h + 10
                     
 
     def update(self):
@@ -97,9 +114,12 @@ class Fireboy(Creature):
         
         #collecing the diamonds
         for d in g.diamonds:
-            if self.distance(d) <= 2 * self.r + d.r and d.v == "f":
-                g.diamonds.remove(d)
+            if self.distance(d) <= self.r + d.r and d.v == "f":
                 self.dmndCnt1 += 1
+                g.dmndSound.rewind()
+                g.dmndSound.play()
+                g.diamonds.remove(d)
+                
         
         #if the character steps on lava, the game restarts
         for l in g.lava:
@@ -107,6 +127,8 @@ class Fireboy(Creature):
                 image(g.gameOver, g.w/2 - 250, g.h/2 - 90)
                 textSize(30)
                 text("press space to restart", g.w/2 - 160, g.h/2 + 140)
+                g.gameOverSound.rewind()
+                g.gameOverSound.play()
                 g.endOfGame = True
         
         #changing the conditions to open the doors
@@ -114,7 +136,14 @@ class Fireboy(Creature):
             if self.distance(d) <= self.r and d.v == 'b':
                 d.boy_door_open = True 
             else:
-                d.boy_door_open = False    
+                d.boy_door_open = False  
+                  
+        #pressing the buttons, platforms go down
+        for button in g.buttons: 
+            if self.distance(button) <= 45:
+                button.button_pressed_boy= True
+            elif self.distance(button) > 45:
+                button.button_pressed_boy=False
                 
     #measuring the distance between the character and an object    
     def distance(self, target):
@@ -158,7 +187,10 @@ class Watergirl(Creature):
         
         #collecing the diamonds
         for d in g.diamonds:
-            if self.distance(d) <= 2 * self.r + d.r and d.v == "w":
+            if self.distance(d) <= self.r + d.r and d.v == "w":
+                self.dmndCnt2 += 1
+                g.dmndSound.rewind()
+                g.dmndSound.play()
                 g.diamonds.remove(d)
                 
         #if the character steps on water, the game restarts
@@ -167,6 +199,8 @@ class Watergirl(Creature):
                 image(g.gameOver, g.w/2 - 250, g.h/2 - 90)
                 textSize(30)
                 text("press space to restart", g.w/2 - 160, g.h/2 + 140)
+                g.gameOverSound.rewind()
+                g.gameOverSound.play()
                 g.endOfGame = True
     
         #changing the conditions to open the doors
@@ -175,6 +209,15 @@ class Watergirl(Creature):
                 d.girl_door_open = True 
             else:
                 d.girl_door_open = False
+                
+        #pressing the buttons, platforms go down
+        for button in g.buttons: 
+            if self.distance(button) <= 45:
+                button.button_pressed_girl= True
+            elif self.distance(button) > 45:
+                button.button_pressed_girl=False
+
+
                 
     #measuring the distance between the character and an object    
     def distance(self, target):
@@ -247,28 +290,67 @@ class Lava:
         image(self.img, self.x - g.x, self.y, self.w, self.h)
 
 class Buttons:
-    def __init__(self, x, y, r, w, h, img, v):
-         self.x = x
-         self.y = y
-         self.r = r
-         self.w = w
-         self.h = h
-         self.img = loadImage(path + "images/" + img)
-         self.v = v
-         
+    def __init__(self, x, y, w, h, col, img, v):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.col = col
+        self.img = loadImage(path + "images/" + img)
+        self.v = v
+        self.button_pressed_boy = False
+        self.button_pressed_girl = False
+        self.button_held = False
+
     def display(self):
-         image(self.img, self.x - g.x, self.y, self.w, self.h)
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+        
+        if (self.button_pressed_boy == True or self.button_pressed_girl == True) and self.button_held == False:
+            print('click')
+            self.button_held = True
+            for bar in g.bars:
+                if bar.v==self.col:
+                    bar.button_pressed = True
+        elif (self.button_pressed_boy == False and self.button_pressed_girl == False) and self.button_held == True:
+            print('clack')
+            self.button_held = False
+            for bar in g.bars:
+                if bar.v==self.col:
+                    bar.button_pressed = False
+            
+            
          
 class Bars:
-     def __init__(self, x, y, w, h, img):
-         self.x = x
-         self.y = y
-         self.w = w
-         self.h = h
-         self.img = loadImage(path + "images/" + img)
- 
-     def display(self):
-         image(self.img, self.x - g.x, self.y, self.w, self.h)
+    def __init__(self, x, y, w, h, img, v, bot):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.v=v
+        self.img = loadImage(path + "images/" + img)
+        self.vy=0
+        self.button_pressed = False
+        #0 - standing, 1 - going down, 2 - going up
+        self.state = 0
+        
+        self.top = y
+        self.bot = bot
+        
+
+    def display(self):
+        image(self.img, self.x - g.x, self.y, self.w, self.h)
+        if self.button_pressed == True:
+            if self.y < self.bot:
+                self.y += 1
+                self.state = 1
+            else:
+                self.state = 0
+        else:
+            if self.y > self.top:
+                self.y -= 1
+                self.state = 2
+            else:
+                self.state = 0
 
 class Game:
 
@@ -294,6 +376,11 @@ class Game:
         self.doors=[]
         self.bars=[]
         self.flag = 0
+        self.amDmnd = 0
+        self.dmndSound = player.loadFile(path+"sounds/diamond.mp3")
+        self.winSound = player.loadFile(path+"sounds/win.mp3")
+        self.levelUp = player.loadFile(path+"sounds/level.mp3")
+        self.gameOverSound = player.loadFile(path+"sounds/game_over.mp3")
         
         #depending on the level, we iterate through different .csv files to set up the levels
         if self.levelTwo == False:
@@ -306,24 +393,28 @@ class Game:
                     self.platforms.append(Platform(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"platform.png"))
                 elif l[0]=="red":
                     self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_fire.png",15,"f"))
+                    self.amDmnd += 1
                 elif l[0]=="blue":
                     self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_water.png",15,"w"))
+                    self.amDmnd += 1
                 elif l[0]=="lava":
                     self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "lava.png", "f"))
+                elif l[0]=="water":
+                    self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "water.png", "w"))
                 elif l[0]=="boy_door":
                     self.doors.append(Doors(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "boy_door_closed.png", "b"))
                 elif l[0]=="girl_door":
                     self.doors.append(Doors(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "girl_door_closed.png", "g"))
                 elif l[0]=="purple_bar":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_bar.png"))
-                elif l[0]=="water":
-                    self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "water.png", "w"))
+                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_bar.png", "p",  395))
                 elif l[0]=="yellow_bar":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_bar.png"))
+                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_bar.png", "y", 520 ))
                 elif l[0]=="yellow_button":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_button.png"))
-                elif l[0]=="purple_button":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_button.png"))
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"y", "yellow_button.png", "y"))
+                elif l[0]=="purple button1":
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"p", "purple_button.png", "p1"))
+                elif l[0]=="purple button2":
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"p", "purple_button.png", "p2"))
         else:
             f = open(path+"/setUpGame_2.csv","r")
             for l in f:
@@ -334,24 +425,28 @@ class Game:
                     self.platforms.append(Platform(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"platform.png"))
                 elif l[0]=="red":
                     self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_fire.png",15,"f"))
+                    self.amDmnd += 1
                 elif l[0]=="blue":
                     self.diamonds.append(Diamond(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "diamond_water.png",15,"w"))
+                    self.amDmnd += 1
                 elif l[0]=="lava":
                     self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "lava.png", "f"))
+                elif l[0]=="water":
+                    self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "water.png", "w"))
                 elif l[0]=="boy_door":
                     self.doors.append(Doors(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "boy_door_closed.png", "b"))
                 elif l[0]=="girl_door":
                     self.doors.append(Doors(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "girl_door_closed.png", "g"))
                 elif l[0]=="purple_bar":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_bar.png"))
-                elif l[0]=="water":
-                    self.lava.append(Lava(int(l[1]),int(l[2]),15,int(l[3]),int(l[4]), "water.png", "w"))
+                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_bar.png", "p",  460))
                 elif l[0]=="yellow_bar":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_bar.png"))
+                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_bar.png", "y", 625 ))
                 elif l[0]=="yellow_button":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "yellow_button.png"))
-                elif l[0]=="purple_button":
-                    self.bars.append(Bars(int(l[1]),int(l[2]),int(l[3]),int(l[4]), "purple_button.png"))
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"y", "yellow_button.png", "y"))
+                elif l[0]=="purple_button1":
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"p", "purple_button.png", "p1"))
+                elif l[0]=="purple_button2":
+                    self.buttons.append(Buttons(int(l[1]),int(l[2]),int(l[3]),int(l[4]),"p", "purple_button.png", "p2"))
                     
                     
     def display(self):
@@ -392,10 +487,19 @@ class Game:
                 self.flag = 1
                 image(self.endPic, 0, 0)
                 image(self.gameWin, self.w/2 - 250, self.h/2 - 250)
+                textSize(25)
+                if (self.fireboy.dmndCnt1 + self.watergirl.dmndCnt2) == self.amDmnd:
+                    text("congrats, you have collected all the diamonds", g.w/2 - 270, g.h/2 + 320)
+                else:
+                    text("you did not collect all the diamonds, but nice try.",g.w/2 - 270, g.h/2 + 320)
                 textSize(30)
                 text("to play again, press enter", g.w/2 - 180, g.h/2 + 280)
+                self.winSound.rewind()
+                self.winSound.play()
                 g.endOfGame = True
                 return 
+            self.levelUp.rewind()
+            self.levelUp.play()
             g.__init__(1000, 750, 750, True)
     
 #initializing the game, starting with level one

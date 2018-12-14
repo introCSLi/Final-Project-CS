@@ -1,30 +1,30 @@
-lava,430,730,125,20
-water,650,730,125,20
-red,475,700,35,35
-blue,695,700,35,35
-platform long,0,650,350,30
-platform short,830,650,170,30
-platform long,0,540,350,30
-platform long,350,540,350,30
-yellow_button,200,520,40,20
-yellow_bar,10,415,95,20
-platform short,130,415,170,30
-platform long,300,415,350,30
-platform long,650,415,350,30
-purple_button,290,395,40,20
-red,200,375,35,35
-blue,650,375,35,35
-purple_bar,890,310,95,20
-platform long,0,310,350,30
-platform long,350,310,350,30
-platform short,700,310,170,30
-purple_button,700,290,40,20
-platform short,0,170,170,30
-blue,50,130,35,35
-platform long,300,90,350,30
-platform long,650,90,350,30
-red,330,50,35,35
-red,540,50,35,35
-blue,670,50,35,35
-girl_door,920,20,60,70
-boy_door,830,20,60,70
+lava,430,730,125,20,
+water,650,730,125,20,
+red,475,700,35,35,
+blue,695,700,35,35,
+platform long,0,650,350,30,
+platform short,830,650,170,30,
+platform long,0,540,350,30,
+platform long,350,540,350,30,
+yellow_button,200,520,40,20,
+yellow_bar,0,415,130,20,
+platform short,130,415,170,30,
+platform long,300,415,350,30,
+platform long,650,415,350,30,
+purple button1,290,395,40,20, 
+red,200,375,35,35,
+blue,650,375,35,35,
+platform long,0,310,350,30,
+platform long,350,310,350,30,
+platform short,700,310,170,30,
+purple_bar,870,310,130,20,
+purple button1,700,290,40,20, 
+platform short,0,170,170,30,
+blue,50,130,35,35,
+platform long,300,90,350,30,
+platform long,650,90,350,30,
+red,330,50,35,35,
+red,540,50,35,35,
+blue,670,50,35,35,
+girl_door,920,20,60,70,
+boy_door,830,20,60,70,
